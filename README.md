@@ -18,21 +18,35 @@ The chart targets GKE. The deployment model is GitOps: ArgoCD watches this repo 
 
 - Helm 3.x installed (`helm version`)
 - Python 3.9+ installed (`python3 --version`)
-- pytest installed (`pip install pytest`)
+- An active Python virtual environment with pytest installed (see Setup below)
 - Claude Code installed and running in this repo
 
 ## Setup
 
-### 1. Clone and open in Claude Code
+### Clone and open in Claude Code
 
 ```bash
 git clone <this-repo>
-cd helmtutorial
+cd helm-claudecode-tutorial
 ```
 
 Open Claude Code in this directory. It will read `AGENTS.md` automatically.
 
-### 2. Verify hooks are operational
+### Set up a Python virtual environment
+
+The hook scripts run inside Claude Code's shell. They must be able to import their dependencies, so **you need an active venv before running `check-hooks.sh` or starting Claude Code**.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pytest
+```
+
+Keep this venv active in every terminal session you use for the tutorial. If you open a new shell, re-run `source .venv/bin/activate` before invoking Claude Code.
+
+> **Why a venv?** The hooks are invoked by Claude Code as subprocesses using the `python3` on your `PATH`. A venv ensures pytest and any other hook dependencies are available regardless of your system Python configuration.
+
+### Verify hooks are operational
 
 Run the preflight check before starting. This confirms that Python, pytest, and the hook scripts are all wired up correctly:
 
@@ -44,7 +58,7 @@ All checks must pass. The script will tell you exactly what to fix if anything i
 
 The hooks provide a hard technical block on `helm install` / `helm upgrade` and an audit trail of all helm commands run through Claude Code. Without them, Claude's behavior is governed only by the rules in `AGENTS.md` — there is no system-level enforcement layer.
 
-### 3. Verify the chart
+### Verify the chart
 
 ```bash
 cd charts/myapp

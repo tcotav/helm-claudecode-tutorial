@@ -2,6 +2,10 @@
 
 **Goal:** Make targeted changes to values files across environments, then validate the chart renders correctly. Learn how changes in one environment do not accidentally affect others.
 
+You'll also be introduced to **skills** — reusable prompt workflows that encapsulate a sequence of steps into a single command. The `/helm-check` skill makes its first appearance in this exercise.
+
+Skills are a Claude Code feature. You can read more about them in the [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code/slash-commands). To see exactly what `/helm-check` does, read the skill definition at `.claude/skills/helm-check/SKILL.md`.
+
 ---
 
 ## Why This Matters
@@ -36,7 +40,14 @@ In dev, reduce the CPU limit to 50m and the memory limit to 64Mi. I want to make
 
 ## Step 3: Validate with /helm-check
 
-Now validate that the chart still renders cleanly after your changes:
+This step uses `/helm-check` — a Claude Code skill installed in `.claude/skills/helm-check/`. Instead of running `helm lint` and `helm template` as separate commands and interpreting the output yourself, `/helm-check` sequences them automatically and summarizes the result. You invoke it like a slash command directly in Claude Code.
+
+Two commands run under the hood, and they catch different problems:
+
+- **`helm lint`** validates the chart's structure and template syntax without rendering anything. It catches malformed YAML, missing required values, and references to undefined template helpers. It's fast and needs no cluster access.
+- **`helm template`** performs the full render: merges values, executes all Go template logic, and outputs the final Kubernetes manifests. This is what ArgoCD will actually apply. Seeing the output is how you confirm your values changes landed where you intended.
+
+Lint can pass while template fails (a values reference that's syntactically valid but undefined at render time). Template can succeed while producing manifests you didn't intend (wrong replica count, missing Ingress). Both together give you confidence. That's why `/helm-check` runs them in sequence.
 
 ```
 /helm-check charts/myapp
