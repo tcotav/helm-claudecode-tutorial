@@ -22,3 +22,12 @@ ingress:
 config:
   logLevel: info
   maxConnections: 50
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false

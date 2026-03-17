@@ -1,7 +1,7 @@
 # Production environment overrides.
 # Goal: high availability, TLS termination, tighter logging.
 
-replicaCount: 3
+replicaCount: 5
 
 resources:
   requests:
@@ -27,3 +27,14 @@ ingress:
 config:
   logLevel: warn
   maxConnections: 200
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      storageClass: standard-rwo
+      size: 8Gi

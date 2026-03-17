@@ -41,6 +41,6 @@ config:
   maxConnections: 100
 
 # Redis subchart configuration.
-# Set redis.enabled=true and add the dependency to Chart.yaml to activate.
+# Set redis.enabled=true in an environment values file to activate.
 redis:
   enabled: false

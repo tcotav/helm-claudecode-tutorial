@@ -50,8 +50,11 @@ def main():
     if tool_name != "Bash" or not re.search(HELM_PATTERN, command, re.IGNORECASE):
         sys.exit(0)
 
-    success = tool_response.get("success", False)
-    exit_code = tool_response.get("exit_code", "unknown")
+    # Claude Code PostToolUse sends tool_response with "output" and "interrupted"
+    # fields. "success" and "exit_code" are not provided by the hook framework.
+    # A command that completed without interruption is considered successful.
+    success = not tool_response.get("interrupted", False)
+    exit_code = 0 if success else 1
 
     # Note: PostToolUse only fires after execution. If a PreToolUse hook blocked
     # the command, this hook never runs -- so every logged command was approved.
