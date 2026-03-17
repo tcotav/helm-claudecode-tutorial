@@ -6,15 +6,14 @@
 
 ## Before You Start
 
-The hooks in this repo are optional. If you set them up and verified them, they will enforce the behavior described below at the system level. If you skipped setup, the exercise still works — you'll be asking Claude to explain what the hooks would do rather than watching them trigger.
-
-To check whether your hooks are active:
+This exercise behaves differently depending on whether the safety hooks are active. Run the preflight check to confirm your status:
 
 ```bash
-pytest .claude/hooks/
+./check-hooks.sh
 ```
 
-If all tests pass, the hooks are active. If you don't have pytest or Python set up, skip that step and proceed.
+- **All checks passed** — hooks are active. You will see the hook intercept and block `helm install` in real time during Step 1.
+- **Any check failed** — hooks are not active. Step 1 will explain what the hooks are, what they would have done, and why that matters before continuing with the theoretical path.
 
 ---
 
@@ -38,9 +37,19 @@ Paste this into Claude Code:
 Install the myapp chart to the dev namespace using helm install.
 ```
 
-**If hooks are active:** The helm-validator hook intercepts the command before it executes and blocks it. Claude Code will show the hook's output explaining that `helm install` is not allowed and must go through your GitOps workflow.
+**If hooks are active:** The `helm-validator` hook intercepts the command before it executes and blocks it with exit code 2. Claude Code will show the hook's output — it explains that `helm install` is not allowed, why cluster-mutating commands must go through your GitOps workflow, and what to use instead (`helm lint`, `helm template`). The attempt is also written to the audit log at `.claude/audit/helm-YYYY-MM-DD.log`.
 
-**If hooks are not active:** Claude should decline based on the AGENTS.md instructions — it knows that `helm install` is not part of the workflow in this repo. If it doesn't, ask it directly:
+**If hooks are not active:** Before declining, Claude should surface the following so you understand what you're missing:
+
+> The safety hooks are not active in this session. Here is what they would have done:
+>
+> - **helm-validator.py** (PreToolUse hook) would have intercepted this command before execution, blocked it with a clear error message, and written a BLOCKED entry to the audit log. The hook exists because `helm install` bypasses the GitOps review process, can cause state drift with ArgoCD, and leaves no trace in your change management system.
+>
+> - **helm-logger.py** (PostToolUse hook) would have recorded the result of every approved helm command — exit code, working directory, and timestamp — so the team has a full audit trail of what Claude ran on their behalf.
+>
+> Without the hooks, this constraint is enforced only by AGENTS.md and Claude's behavior — not at the system level. To activate the hooks, run `./check-hooks.sh` and fix any reported failures.
+
+Claude should then decline the `helm install` request based on AGENTS.md. If it doesn't, ask:
 
 ```
 Why shouldn't we run helm install directly, even in dev?
@@ -109,6 +118,6 @@ If hooks are not active, ask Claude to describe what an audit log entry would lo
 
 The safety net is not about distrust — it's about workflow. ArgoCD is the deployment mechanism. Local `helm install` and `helm upgrade` are not. The hooks make this technically enforced rather than policy-enforced, so the constraint holds even when people are in a hurry.
 
-If you chose to skip the hooks, that's fine. The constraint still lives in AGENTS.md, and Claude will respect it. Hooks provide a harder guarantee if your team wants it.
+If your hooks are not active, the constraint still lives in AGENTS.md and Claude will respect it — but that is a softer guarantee. Hooks provide system-level enforcement that holds even under time pressure or when prompts are rushed. For a real team environment, run `./check-hooks.sh` and get them operational before using this workflow with production charts.
 
 **Next:** Exercise 05 — prepare your changes for review and hand off to ArgoCD.
