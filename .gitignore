@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .venv/
 charts/*/charts/
+charts/*/Chart.lock
