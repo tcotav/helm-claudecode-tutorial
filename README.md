@@ -17,6 +17,8 @@ The chart targets GKE. The deployment model is GitOps: ArgoCD watches this repo 
 ## Prerequisites
 
 - Helm 3.x installed (`helm version`)
+- Python 3.9+ installed (`python3 --version`)
+- pytest installed (`pip install pytest`)
 - Claude Code installed and running in this repo
 
 ## Setup
@@ -30,18 +32,17 @@ cd helmtutorial
 
 Open Claude Code in this directory. It will read `AGENTS.md` automatically.
 
-### 2. (Optional) Activate the safety hooks
+### 2. Verify hooks are operational
 
-The hooks are optional. They provide a hard technical block on `helm install` / `helm upgrade` and an audit trail of all helm commands run through Claude Code.
-
-To activate them, you need Python and pytest:
+Run the preflight check before starting. This confirms that Python, pytest, and the hook scripts are all wired up correctly:
 
 ```bash
-pip install pytest
-pytest .claude/hooks/
+./check-hooks.sh
 ```
 
-All tests must pass before the hooks will behave correctly. If you skip this step, Claude's behavior is still governed by the rules in `AGENTS.md` — you just won't have the system-level enforcement layer.
+All checks must pass. The script will tell you exactly what to fix if anything is missing. Do not proceed to the tutorial until this reports clean.
+
+The hooks provide a hard technical block on `helm install` / `helm upgrade` and an audit trail of all helm commands run through Claude Code. Without them, Claude's behavior is governed only by the rules in `AGENTS.md` — there is no system-level enforcement layer.
 
 ### 3. Verify the chart
 
