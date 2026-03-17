@@ -1,7 +1,7 @@
 # Production environment overrides.
 # Goal: high availability, TLS termination, tighter logging.
 
-replicaCount: 5
+replicaCount: 3
 
 resources:
   requests:
@@ -13,7 +13,8 @@ resources:
 
 ingress:
   enabled: true
-  annotations: {}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
   hosts:
     - host: myapp.prod.example.com
       paths:
@@ -27,14 +28,3 @@ ingress:
 config:
   logLevel: warn
   maxConnections: 200
-
-redis:
-  enabled: true
-  architecture: standalone
-  auth:
-    enabled: false
-  master:
-    persistence:
-      enabled: true
-      storageClass: standard-rwo
-      size: 8Gi

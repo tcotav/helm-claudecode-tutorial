@@ -4,9 +4,3 @@ description: A sample nginx-based web application for GKE, used in the Claude Co
 type: application
 version: 0.1.0
 appVersion: "1.25.3"
-
-dependencies:
-  - name: redis
-    version: "19.x.x"
-    repository: https://charts.bitnami.com/bitnami
-    condition: redis.enabled
