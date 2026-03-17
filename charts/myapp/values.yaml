@@ -1,0 +1,46 @@
+# Default values for myapp.
+# These are the base values shared across all environments.
+# Environment-specific overrides live in values-dev.yaml, values-staging.yaml, and values-prod.yaml.
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "1.25.3"
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: myapp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Application configuration, injected via ConfigMap
+config:
+  logLevel: info
+  maxConnections: 100
+
+# Redis subchart configuration.
+# Set redis.enabled=true and add the dependency to Chart.yaml to activate.
+redis:
+  enabled: false

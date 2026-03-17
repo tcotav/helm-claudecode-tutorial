@@ -1,0 +1,24 @@
+# Staging environment overrides.
+# Goal: production-like config at reduced scale to catch integration issues before prod.
+
+replicaCount: 2
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+ingress:
+  enabled: true
+  hosts:
+    - host: myapp.staging.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+config:
+  logLevel: info
+  maxConnections: 50
